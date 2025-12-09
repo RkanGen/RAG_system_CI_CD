@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  # The RAG API Service
+  api:
+    build: 
+      context: .
+      dockerfile: deployment/Dockerfile
+    container_name: rag_api
+    ports:
+      - "8000:8000"
+    environment:
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+      - VECTOR_DB_BACKEND=qdrant
+      - OPENAI_API_KEY=${OPENAI_API_KEY} 
+      # Mount local data for persistence during dev
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - qdrant
+    restart: always
+
+  # Vector Database
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    restart: always
+
+ 
